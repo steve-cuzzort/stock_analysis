@@ -1,0 +1,14 @@
+[Dd]ist/
+[Pp]rivate/
+[Dd]ocumentation/
+[Bb]uild/
+/TACore/build/
+
+*.db
+*.class
+*.log
+private.properties
+private.xml
+/StockGrabber/build/
+/NewsSpider/build/
+/NewsSpider/~/

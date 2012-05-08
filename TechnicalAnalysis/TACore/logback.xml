@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+  <appender name="stdout">
+    <encoder>
+      %-5p [%c] - <%m>%n
+    </encoder>
+  </appender>
+  <logger name="demo" level="DEBUG"/>
+  <root level="WARN">
+    <appender-ref ref="stdout"/>
+  </root>
+</configuration>
