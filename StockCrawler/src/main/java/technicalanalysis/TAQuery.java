@@ -6,17 +6,7 @@ package technicalanalysis;
 
 import com.tictactec.ta.lib.MInteger;
 import com.tictactec.ta.lib.meta.CoreMetaData;
-import com.tictactec.ta.lib.meta.TaFuncService;
-import com.tictactec.ta.lib.meta.TaGrpService;
-import com.tictactec.ta.lib.meta.annotation.InputParameterInfo;
-import com.tictactec.ta.lib.meta.annotation.IntegerList;
-import com.tictactec.ta.lib.meta.annotation.IntegerRange;
-import com.tictactec.ta.lib.meta.annotation.OptInputParameterInfo;
-import com.tictactec.ta.lib.meta.annotation.OutputParameterInfo;
-import com.tictactec.ta.lib.meta.annotation.RealList;
-import com.tictactec.ta.lib.meta.annotation.RealRange;
-import com.tictactec.ta.lib.meta.annotation.FuncInfo;
-import com.tictactec.ta.lib.meta.annotation.OutputParameterType;
+import com.tictactec.ta.lib.meta.annotation.*;
 import hibernate.entities.Stock;
 import java.lang.String;
 import java.lang.reflect.Method;
@@ -28,7 +18,7 @@ import java.util.Set;
  *
  * @author gtri
  */
-public class TAQuery implements TaGrpService, TaFuncService
+public class TAQuery implements com.tictactec.ta.lib.meta.TaFuncService, com.tictactec.ta.lib.meta.TaGrpService
 {
 	private ArrayList<FuncInfoAndMetaData> m_groupList;
 	private ArrayList<FuncInfoAndMetaData> m_funcList;

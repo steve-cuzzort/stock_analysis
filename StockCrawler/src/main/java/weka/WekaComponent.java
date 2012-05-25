@@ -26,7 +26,8 @@ import weka.core.Instances;
 public class WekaComponent 
 {
 	static final Logger logger = LoggerFactory.getLogger(WekaComponent.class);
-
+        static final int FOLDS = 10;
+        
 	public static Instances CreateWekaInstances(Stock stock, List<TAOutput> outs, int look_ahead, double increase) throws Exception
 	{
 		FastVector      atts = new FastVector();
@@ -91,31 +92,34 @@ public class WekaComponent
 		return data;
 	}
 	
-	public static void makeModel(Stock stock, Instances data) throws Exception
+	public static void makeModel(Stock stock, Instances data, double lookAhead, double change) throws Exception
 	{
 		if(data.numInstances() > 20)
 		{
+                        
 			// Create a naïve bayes classifier 
 			Classifier model = (Classifier)new weka.classifiers.trees.J48();
 			//model.buildClassifier(data);
 
 			Evaluation eval = new Evaluation(data);
 			Random rand = new Random(1);  // using seed = 1
-			int folds = 10;
-			eval.crossValidateModel(model, data, folds, rand);
+			eval.crossValidateModel(model, data, FOLDS, rand);
 
 			HibernateUtil.beginTransaction();
 			StockStats ss = new StockStats();
 			double total = eval.correct() + eval.incorrect();
+                        ss.setStock_sym(stock.getSymbol());
 			ss.setCorrect(new Double(eval.correct() / total));
 			ss.setIncorrect(new Double(eval.incorrect() / total));
-			ss.setSummary(eval.toSummaryString());
+                        ss.setChange(change);
+                        ss.setLook_ahead(lookAhead);
+                        ss.setSummary(eval.toSummaryString());
+                        ss.setConfusion_matrix(eval.toMatrixString());
+                        
 			ss.setClassifier_name(weka.classifiers.trees.J48.class.getName());
-			ss.setConfusion_matrix(eval.confusionMatrix());
-			logger.info("\n===" + stock.getSymbol() + "===" + ss.getSummary()+"\n"+ss.getConfusion_matrix());
+			logger.info("\n===" + ss.getStock_sym() + "===" + ss.getSummary()+"\n"+ss.getConfusion_matrix());
 
-			stock.addStat(ss);
-			HibernateUtil.getCurrentSession().save(stock);
+			HibernateUtil.getCurrentSession().save(ss);
 			HibernateUtil.commit();
 		}
 	}

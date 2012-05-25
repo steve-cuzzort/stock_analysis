@@ -28,6 +28,12 @@ public class StockStats
 	@Column(name="incorrect")
 	private Double incorrect;
 
+	@Column(name="look_ahead")
+	private Double look_ahead;
+
+	@Column(name="change")
+	private Double change;
+        
 	@Column(name="summary")
 	private String summary;		
 
@@ -37,6 +43,35 @@ public class StockStats
 	@Column(name="confusion_matrix")
 	private String confusion_matrix;
 
+	@Column(name="stock_sym")
+	private String stock_sym;
+
+        public Double getChange() {
+            return change;
+        }
+
+        public void setChange(Double change) {
+            this.change = change;
+        }
+
+        public Double getLook_ahead() {
+            return look_ahead;
+        }
+
+        public void setLook_ahead(Double look_ahead) {
+            this.look_ahead = look_ahead;
+        }
+
+
+        
+        public String getStock_sym() {
+            return stock_sym;
+        }
+
+        public void setStock_sym(String stock_sym) {
+            this.stock_sym = stock_sym;
+        }
+        
 	public Double getCorrect() {
 		return correct;
 	}

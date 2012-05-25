@@ -25,7 +25,10 @@ import weka.core.Instances;
 public class MainCalcIndicators 
 {
 	// SELECT * FROM stock JOIN stock_stockstats ON(stock.id = stock_stockstats.Stock_id) JOIN stockstats ON(stock_stockstats.stats_id = stockstats.id) WHERE 1
-	public static void main(String args[]) throws Exception
+        static int lookAheadList[] = {3};
+        static double changeList[] = {.03, .04, .05};
+    
+        public static void main(String args[]) throws Exception
 	{
 		Logger rootLogger = Logger.getRootLogger();
 		if (!rootLogger.getAllAppenders().hasMoreElements()) 
@@ -77,10 +80,16 @@ public class MainCalcIndicators
 					}
 				}
 			}
-			Instances data = WekaComponent.CreateWekaInstances(stock, taouts, 3, .03);
-			WekaComponent.makeModel(stock, data);
-			//WekaComponent.CreateFileFromStockAndOutput("./arff/"+stock.getSymbol()+".arff", stock, taouts, 3, .03);
-			rootLogger.info("Wrote " + stock.getSymbol() + " to file");
+                        
+                        for(int i=0;i<lookAheadList.length;i++)
+                        {
+                            for(int j=0;j<changeList.length;j++)
+                            {
+                                Instances data = WekaComponent.CreateWekaInstances(stock, taouts, lookAheadList[i], changeList[j]);
+                                WekaComponent.makeModel(stock, data, lookAheadList[i], changeList[j]);
+                                rootLogger.info("Wrote " + stock.getSymbol() + " to file (look ahead:" + lookAheadList[i] + ", " + changeList[j] + ")");
+                            }
+                        }
 			HibernateUtil.closeSession();
 		}
 	}

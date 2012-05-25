@@ -41,8 +41,6 @@ public class Stock
 	@Cascade({CascadeType.SAVE_UPDATE})
 	private List<StockEntry> entries = new ArrayList<StockEntry>();
 	@OneToMany(fetch=FetchType.LAZY)
-	@Cascade({CascadeType.SAVE_UPDATE})
-	private List<StockStats> stats = new ArrayList<StockStats>();
 			
 	public Long getId() {
 		return id;
@@ -89,36 +87,6 @@ public class Stock
 		return retdate;
 	}
 
-	public List<StockStats> getStats() {
-		return stats;
-	}
-
-	public void setStats(List<StockStats> stats) {
-		this.stats = stats;
-	}	
-	
-	public void addStat(StockStats stat)
-	{
-		if(stats == null)
-		{
-			stats = new ArrayList<StockStats>();
-		}
-		
-		for(StockStats s : stats)
-		{
-			if(s.getClassifier_name().equals(stat.getClassifier_name()))
-			{
-				s.setClassifier_name(stat.getClassifier_name());
-				s.setCorrect(stat.getCorrect());
-				s.setIncorrect(stat.getIncorrect());
-				s.setSummary(stat.getSummary());
-				return;
-			}
-		}
-		
-		stats.add(stat);
-	}
-	
 	public org.joda.time.DateTime getOldestEntry()
 	{
 		if(entries == null || entries.size() == 0)
