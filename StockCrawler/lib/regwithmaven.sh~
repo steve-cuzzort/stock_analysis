@@ -1,0 +1,1 @@
+mvn install:install-file -Dfile=ta-lib.jar -DgroupId=com.ta-lib -DartifactId=ta-lib -Dversion=0.4.0 -Dpackaging=jar
