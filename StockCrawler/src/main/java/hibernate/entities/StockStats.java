@@ -4,11 +4,7 @@
  */
 package hibernate.entities;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 /**
  *
@@ -34,18 +30,29 @@ public class StockStats
 	@Column(name="change")
 	private Double change;
         
-	@Column(name="summary")
+	@Column(name="summary", columnDefinition="TEXT")
 	private String summary;		
 
 	@Column(name="classifier_name")
 	private String classifier_name;
 
-	@Column(name="confusion_matrix")
+	@Column(name="confusion_matrix", columnDefinition="TEXT")
 	private String confusion_matrix;
 
 	@Column(name="stock_sym")
 	private String stock_sym;
 
+        @Column(name="model", columnDefinition="TEXT")
+        private String model;
+
+    public String getModel() {
+        return model;
+    }
+
+    public void setModel(String model) {
+        this.model = model;
+    }
+        
         public Double getChange() {
             return change;
         }

@@ -7,6 +7,8 @@ package weka;
 import hibernate.HibernateUtil;
 import hibernate.entities.Stock;
 import hibernate.entities.StockStats;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectOutputStream;
 import java.util.List;
 import java.util.Random;
 import org.slf4j.Logger;
@@ -26,7 +28,7 @@ import weka.core.Instances;
 public class WekaComponent 
 {
 	static final Logger logger = LoggerFactory.getLogger(WekaComponent.class);
-        static final int FOLDS = 10;
+        static final int FOLDS = 5;
         
 	public static Instances CreateWekaInstances(Stock stock, List<TAOutput> outs, int look_ahead, double increase) throws Exception
 	{
@@ -99,6 +101,12 @@ public class WekaComponent
                         
 			// Create a naïve bayes classifier 
 			Classifier model = (Classifier)new weka.classifiers.trees.J48();
+                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                        ObjectOutputStream oos = new ObjectOutputStream(baos);
+                        oos.writeObject(model);
+                        oos.flush();
+                        oos.close();
+                        
 			//model.buildClassifier(data);
 
 			Evaluation eval = new Evaluation(data);
@@ -113,14 +121,17 @@ public class WekaComponent
 			ss.setIncorrect(new Double(eval.incorrect() / total));
                         ss.setChange(change);
                         ss.setLook_ahead(lookAhead);
+                        String modelString = javax.xml.bind.DatatypeConverter.printBase64Binary(baos.toByteArray());
+                        ss.setModel(modelString);
+
                         ss.setSummary(eval.toSummaryString());
                         ss.setConfusion_matrix(eval.toMatrixString());
                         
 			ss.setClassifier_name(weka.classifiers.trees.J48.class.getName());
-			logger.info("\n===" + ss.getStock_sym() + "===" + ss.getSummary()+"\n"+ss.getConfusion_matrix());
+			logger.info("\n===" + ss.getStock_sym() + "(" + lookAhead + " days ahead " + change*100 + "% change)" + "===" + ss.getSummary()+"\n"+ss.getConfusion_matrix());
 
 			HibernateUtil.getCurrentSession().save(ss);
-			HibernateUtil.commit();
+			HibernateUtil.commit();                        
 		}
 	}
 }

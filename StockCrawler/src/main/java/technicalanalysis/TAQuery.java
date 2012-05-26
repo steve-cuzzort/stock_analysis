@@ -27,6 +27,7 @@ public class TAQuery implements com.tictactec.ta.lib.meta.TaFuncService, com.tic
 	private int m_volume[];
 	private double m_doubleTempArr[][];
 	private int m_intTempArr[][];
+        private int m_lookUpToIndex = 0;
 	
 	public TAQuery(Stock stock)
 	{
@@ -51,13 +52,14 @@ public class TAQuery implements com.tictactec.ta.lib.meta.TaFuncService, com.tic
 	
 	protected void generateArraysFromStock()
 	{
-            m_open = new double[m_stock.getEntries().size()];
-            m_close = new double[m_stock.getEntries().size()];
-            m_high = new double[m_stock.getEntries().size()]; 
-            m_low = new double[m_stock.getEntries().size()];
-            m_volume = new int[m_stock.getEntries().size()];
+            int alloc_size = m_stock.getEntries().size();
+            m_open = new double[alloc_size];
+            m_close = new double[alloc_size];
+            m_high = new double[alloc_size]; 
+            m_low = new double[alloc_size];
+            m_volume = new int[alloc_size];
 
-            for(int i=0;i<m_stock.getEntries().size();i++)
+            for(int i=0;i<m_lookUpToIndex;i++)
             {
                     m_open[i] = m_stock.getEntries().get(i).getOpen().doubleValue();
                     m_close[i] = m_stock.getEntries().get(i).getClose().doubleValue();
@@ -267,9 +269,6 @@ public class TAQuery implements com.tictactec.ta.lib.meta.TaFuncService, com.tic
             FuncInfoAndMetaData fi = getFunctionData(indicatorName);
             MInteger lOutIdx  = new MInteger();
             MInteger lOutSize = new MInteger();
-//            com.tictactec.ta.lib.Core cmd = new com.tictactec.ta.lib.Core();
-            double out[] = new double[m_open.length];
-            //cmd.htDcPeriod(0, m_open.length - 1, m_open, lOutIdx, lOutSize, out);
             
             Class coreClazz = Class.forName("com.tictactec.ta.lib.Core");
             Object core = coreClazz.newInstance();
