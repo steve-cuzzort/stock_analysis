@@ -11,6 +11,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.ObjectOutputStream;
 import java.util.List;
 import java.util.Random;
+import org.hibernate.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import technicalanalysis.TAOutput;
@@ -114,7 +115,19 @@ public class WekaComponent
 			eval.crossValidateModel(model, data, FOLDS, rand);
 
 			HibernateUtil.beginTransaction();
-			StockStats ss = new StockStats();
+			StockStats ss = null;
+                        
+                        Query q = HibernateUtil.getCurrentSession().createQuery("from " + StockStats.class.getName() +" where stock_sym=:stockname and look_ahead=:lookahead and change=:change");
+                        q.setString("stockname", stock.getSymbol());
+                        q.setInteger("lookahead", (int)lookAhead);
+                        q.setDouble("change", change);
+                        ss = (StockStats)q.uniqueResult();                        
+                        
+                        if(ss == null)
+                        {
+                            ss = new StockStats();
+                        }
+                        
 			double total = eval.correct() + eval.incorrect();
                         ss.setStock_sym(stock.getSymbol());
 			ss.setCorrect(new Double(eval.correct() / total));
