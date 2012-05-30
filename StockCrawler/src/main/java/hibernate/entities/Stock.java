@@ -106,10 +106,25 @@ public class Stock
 		
 		return retdate;
 	}
+        
+        public StockEntry getEntryForDay(org.joda.time.DateTime date)
+        {
+		java.sql.Date finddate = new java.sql.Date(date.year().get(), date.monthOfYear().get(), date.dayOfMonth().get());//year, month, day);
+		
+		for(StockEntry entry : entries)
+		{
+			if(entry.getDate().equals(finddate))
+			{
+				return entry;
+			}
+		}		
+		
+		return null;
+        }
 	
-	public boolean hasDataForDay(int year, int month, int day)
+	public boolean hasDataForDay(org.joda.time.DateTime date)//int year, int month, int day)
 	{
-		java.sql.Date finddate = new java.sql.Date(year, month, day);
+		java.sql.Date finddate = new java.sql.Date(date.year().get(), date.monthOfYear().get(), date.dayOfMonth().get());//year, month, day);
 		
 		for(StockEntry entry : entries)
 		{

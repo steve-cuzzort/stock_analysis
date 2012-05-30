@@ -101,19 +101,13 @@ public class WekaComponent
 		{
                         
 			// Create a naïve bayes classifier 
-			Classifier model = (Classifier)new weka.classifiers.trees.J48();
-                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                        ObjectOutputStream oos = new ObjectOutputStream(baos);
-                        oos.writeObject(model);
-                        oos.flush();
-                        oos.close();
-                        
+			Classifier model = (Classifier)new weka.classifiers.trees.J48();                       
 			//model.buildClassifier(data);
 
 			Evaluation eval = new Evaluation(data);
 			Random rand = new Random(1);  // using seed = 1
 			eval.crossValidateModel(model, data, FOLDS, rand);
-
+                        
 			HibernateUtil.beginTransaction();
 			StockStats ss = null;
                         
@@ -134,8 +128,8 @@ public class WekaComponent
 			ss.setIncorrect(new Double(eval.incorrect() / total));
                         ss.setChange(change);
                         ss.setLook_ahead(lookAhead);
-                        String modelString = javax.xml.bind.DatatypeConverter.printBase64Binary(baos.toByteArray());
-                        ss.setModel(modelString);
+                        
+                        ss.saveModel(model);
 
                         ss.setSummary(eval.toSummaryString());
                         ss.setConfusion_matrix(eval.toMatrixString());

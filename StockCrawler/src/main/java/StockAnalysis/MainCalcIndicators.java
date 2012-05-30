@@ -32,6 +32,9 @@ public class MainCalcIndicators
             {5, .05},
             {7, .07},
             {10, .1},
+
+            {4, .02},
+            {8, .04}
         };
         static double changeList[] = {.01};
     

@@ -4,7 +4,14 @@
  */
 package hibernate.entities;
 
+import hibernate.HibernateUtil;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
+import java.util.List;
 import javax.persistence.*;
+import org.hibernate.Session;
+import weka.classifiers.Classifier;
 
 /**
  *
@@ -12,7 +19,7 @@ import javax.persistence.*;
  */
 @Entity
 public class StockStats 
-{
+{   
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	@Column(name="id")
@@ -45,6 +52,19 @@ public class StockStats
         @Column(name="model", columnDefinition="TEXT")
         private String model;
 
+	public static StockStats findStockStat(String symbol)
+	{
+		Session session = HibernateUtil.getCurrentSession();		
+		org.hibernate.Query query = session.createQuery("FROM " + StockStats.class.getName() + " WHERE stock_sym = :symbol");			
+		query.setString("symbol", symbol);
+		List<StockStats> list = query.list();
+		if(list == null || list.size() == 0)
+		{
+			return null;
+		}
+		return  (StockStats)list.get(0);
+	}
+        
     public String getModel() {
         return model;
     }
@@ -52,7 +72,7 @@ public class StockStats
     public void setModel(String model) {
         this.model = model;
     }
-        
+       
         public Double getChange() {
             return change;
         }
@@ -137,4 +157,83 @@ public class StockStats
 				
 		setConfusion_matrix(sb.toString());
 	}
+        
+        public int getConfusionMatrixAt(int row, int col)
+        {
+            String cm = getConfusion_matrix();
+            
+            if(cm != null)
+            {
+                String lines[] = cm.split("\n");
+            
+                if(lines.length==6)
+                {
+                    return extractNumbersFromString(lines[row+3])[col];
+                }
+            }
+            
+            return -1;
+        }
+
+        public void saveModel(Classifier model) throws Exception
+        {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            weka.core.SerializationHelper.write(baos, model);
+            String modelString = javax.xml.bind.DatatypeConverter.printBase64Binary(baos.toByteArray());
+            setModel(modelString);
+        }
+        
+        public Classifier loadModel() throws Exception
+        {
+            ByteArrayInputStream bais = new ByteArrayInputStream(javax.xml.bind.DatatypeConverter.parseBase64Binary(getModel()));
+            return (Classifier)weka.core.SerializationHelper.read(bais);
+        }
+     
+        private int[] extractNumbersFromString(String line)
+        {
+            ArrayList<Integer> nums = new ArrayList<Integer>();
+            
+            String elems[] = line.split(" ");
+            for(int i=0;i<elems.length;i++)
+            {
+                if(isNumber(elems[i]))
+                {
+                    nums.add(new Integer(convertToInt(elems[i])));
+                }
+            }
+            
+            int ret[] = new int[nums.size()];
+            int count=0;
+            for(Integer i : nums)
+            {
+                ret[count++] = i.intValue();
+            }
+            
+            return ret;
+        }
+        
+        private boolean isNumber(String txt)
+        {
+            try
+            {
+                Integer.parseInt(txt);
+                return true;
+            }
+            catch(Exception e)
+            {
+                return false;
+            }
+        }
+        
+        private int convertToInt(String txt)
+        {
+            try
+            {
+                return Integer.parseInt(txt);
+            }
+            catch(Exception e)
+            {
+                return -1;
+            }            
+        }
 }
