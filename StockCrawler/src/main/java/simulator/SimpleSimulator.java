@@ -11,6 +11,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import technicalanalysis.TAOutput;
 import technicalanalysis.TAQuery;
 import weka.WekaComponent;
@@ -24,6 +26,8 @@ import weka.core.Instances;
  */
 public class SimpleSimulator 
 {
+    static final Logger logger = LoggerFactory.getLogger(SimpleSimulator.class);
+    
     int m_daysBack;
     public SimpleSimulator(int back)
     {
@@ -36,46 +40,35 @@ public class SimpleSimulator
         HibernateUtil.startNewSession();
         for(Stock s : Stock.getAllStocks())
         {
-                stocknames.add(s.getSymbol());
+            stocknames.add(s.getSymbol());
         }
         HibernateUtil.closeSession();
 
-        int goodStock = 0, total=0;
         for(int stockday = 0;stockday<m_daysBack;stockday++)
         {
             for(String stockname : stocknames)
             {
-                    HibernateUtil.startNewSession();
+                HibernateUtil.startNewSession();
 
-                    //System.out.println(stockname);
-                    StockStats ss = StockStats.findStockStat(stockname);
-                    if(ss != null)
+                //System.out.println(stockname);
+                StockStats ss = StockStats.findStockStat(stockname, 4, .04);
+                if(ss != null)
+                {
+                    Stock stock = Stock.findStock(stockname);
+                    int lastday = stock.getEntries().size()-1;
+                    //System.out.println(stockname + " =>" + hasGoodFundamentals(ss));
+                    if(hasGoodFundamentals(ss))
                     {
-                        Stock stock = Stock.findStock(stockname);
-                        int lastday = stock.getEntries().size()-1;
-                        //System.out.println(stockname + " =>" + hasGoodFundamentals(ss));
-                        if(hasGoodFundamentals(ss))
-                        {
-                            Instance inst = generateQueryInstance(stock, lastday - m_daysBack + stockday);
-                            Classifier model = ss.loadModel();
+                        Instance inst = generateQueryInstance(stock, lastday - m_daysBack + stockday);
+                        Classifier model = ss.loadModel();
 
-                            double classification = model.classifyInstance(inst);
-                            System.out.println("classifiaction for " + stockname + " = " + classification);
-                            //Classifier model = (Classifier)new weka.classifiers.trees.J48();
-                            //ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                            //ObjectOutputStream oos = new ObjectOutputStream(baos);
-                            //oos.writeObject(model);
-                            //oos.flush();
-                            //oos.close();
-                            //goodStock++;
-                        }
-
-                        //total++;
+                        double classification = model.classifyInstance(inst);
+                        logger.warn("classifiaction for " + stockname + " = " + classification);
                     }
+                }
 
-                    HibernateUtil.closeSession();
+                HibernateUtil.closeSession();
             }
-//            System.out.println("good = " + goodStock + "\t total=" + total);
         }
     }
     
@@ -107,7 +100,7 @@ public class SimpleSimulator
                 {
                     if(o.hasData())
                     {
-                            taouts.add(o);
+                        taouts.add(o);
                     }
                 }
             }
