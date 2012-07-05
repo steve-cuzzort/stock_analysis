@@ -36,7 +36,7 @@ public class HibernateUtil
             m_cfg.setProperty("hibernate.connection.driver_class", org.postgresql.Driver.class.getName());
             m_cfg.setProperty("hibernate.connection.url", "jdbc:postgresql://localhost/stockdb");
             m_cfg.setProperty("hibernate.connection.username", "postgres");
-            m_cfg.setProperty("hibernate.connection.password", "gtri2011");
+            m_cfg.setProperty("hibernate.connection.password", "postgres");
             m_cfg.setProperty("hibernate.current_session_context_class", "thread");
             m_cfg.setProperty("hibernate.jdbc.batch_size", "" + BATCH_SIZE);
             m_cfg.setProperty("hibernate.hbm2ddl.auto", "update");
@@ -116,10 +116,14 @@ public class HibernateUtil
 
     public static void closeSession()
     {
-        m_session.flush();
-        m_session.clear();
-        m_session.close();
-        m_session = null;
+        try
+        {
+            m_session.flush();
+            m_session.clear();
+            m_session.close();
+            m_session = null;
+        }
+        catch(Exception e){}
     }
 
     public static void generateSchema()

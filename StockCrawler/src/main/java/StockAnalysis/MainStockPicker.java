@@ -34,6 +34,6 @@ public class MainStockPicker
         }
 
         SimpleSimulator sim = new SimpleSimulator(50);
-        sim.runSimulaton();
+        sim.runSimulaton(0);
     }
 }

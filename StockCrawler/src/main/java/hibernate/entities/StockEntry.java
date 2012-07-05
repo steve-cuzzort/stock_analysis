@@ -4,21 +4,17 @@
  */
 package hibernate.entities;
 
-import hibernate.HibernateUtil;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.sql.Date;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import org.hibernate.Query;
-import org.hibernate.Session;
-import org.hibernate.annotations.Cascade;
-import org.hibernate.annotations.CascadeType;
 
 /**
  *
@@ -43,7 +39,17 @@ public class StockEntry
     private Integer volume;
     @Column(name="trade_date")
     private java.sql.Date date;
+    @Column(name="tags",  columnDefinition="TEXT")
+    private String tags;
 
+    public String getTags() {
+        return tags;
+    }
+
+    public void setTags(String tags) {
+        this.tags = tags;
+    }
+    
     public Long getId() {
         return id;
     }
@@ -101,5 +107,53 @@ public class StockEntry
     }
     public void setVolume(Integer volume) {
         this.volume = volume;
+    }
+       
+    public String getInfoByTag(String tagname)
+    {        
+        HashMap<String, String> map = getHashTableFromTags();
+        return map.get(tagname);
+    }
+    
+    public void setInfoByTag(String tag, String val)
+    {
+        HashMap<String, String> map = getHashTableFromTags();
+        map.put(tag, val);
+        setHashTableFromTags(map);
+    }
+    
+    private HashMap<String, String> getHashTableFromTags()
+    {
+        try
+        {
+            ByteArrayInputStream bais = new ByteArrayInputStream(tags.getBytes());
+            ObjectInputStream ostream = new ObjectInputStream(bais);
+            HashMap<String, String> map = (HashMap<String, String>)ostream.readObject();
+            return map;
+        }
+        catch(Exception e)
+        {
+            HashMap<String, String> map = new HashMap<String, String>();
+            setHashTableFromTags(map);
+            return map;
+        }
+    }
+    
+    private void setHashTableFromTags(HashMap<String, String> map)
+    {
+        try
+        {           
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ObjectOutputStream ostream = new ObjectOutputStream(baos);
+            ostream.writeObject(map);
+            ostream.flush();
+            baos.close();
+            
+            setTags(javax.xml.bind.DatatypeConverter.printBase64Binary(baos.toByteArray()));
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+        }
     }
 }

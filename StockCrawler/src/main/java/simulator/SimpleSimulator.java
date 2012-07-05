@@ -6,6 +6,7 @@ package simulator;
 
 import hibernate.HibernateUtil;
 import hibernate.entities.Stock;
+import hibernate.entities.StockEntry;
 import hibernate.entities.StockStats;
 import java.io.ByteArrayInputStream;
 import java.io.ObjectInputStream;
@@ -34,8 +35,9 @@ public class SimpleSimulator
         m_daysBack = back;
     }
     
-    public void runSimulaton() throws Exception
+    public int runSimulaton(int startMoney) throws Exception
     {
+        int money = startMoney;
         List<String> stocknames = new ArrayList<String>();
         HibernateUtil.startNewSession();
         for(Stock s : Stock.getAllStocks())
@@ -44,43 +46,74 @@ public class SimpleSimulator
         }
         HibernateUtil.closeSession();
 
-        for(int stockday = 0;stockday<m_daysBack;stockday++)
+        int total=0, good=0;
+        for(String stockname : stocknames)
         {
-            for(String stockname : stocknames)
-            {
-                HibernateUtil.startNewSession();
+            HibernateUtil.startNewSession();
 
-                //System.out.println(stockname);
-                StockStats ss = StockStats.findStockStat(stockname, 4, .04);
+            total++;
+
+            try
+            {
+                StockStats ss = StockStats.findStockStat(stockname, 3, .03);
+                Stock stock = Stock.findStock(stockname);
+
                 if(ss != null)
                 {
-                    Stock stock = Stock.findStock(stockname);
-                    int lastday = stock.getEntries().size()-1;
-                    //System.out.println(stockname + " =>" + hasGoodFundamentals(ss));
-                    if(hasGoodFundamentals(ss))
-                    {
-                        Instance inst = generateQueryInstance(stock, lastday - m_daysBack + stockday);
-                        Classifier model = ss.loadModel();
-
-                        double classification = model.classifyInstance(inst);
-                        logger.warn("classifiaction for " + stockname + " = " + classification);
-                    }
+                    generatePrediction(ss, stock, 3, "3_.03");                
                 }
 
-                HibernateUtil.closeSession();
+                ss = StockStats.findStockStat(stockname, 5, .05);
+                if(ss != null)
+                {
+                    generatePrediction(ss, stock, 5, "5_.05");                
+                }
+
+                ss = StockStats.findStockStat(stockname, 10, .1);
+                if(ss != null)
+                {
+                    generatePrediction(ss, stock, 10, "10_.1");                
+                }
             }
+            catch(Exception e){e.printStackTrace();}
+            HibernateUtil.closeSession();
         }
+        return money;
     }
     
-    protected boolean hasGoodFundamentals(StockStats stat)
+    protected boolean hasGoodFundamentals(StockStats stat, double goldenRatio)
     {
         // make sure we got decent accuracy
-        if(stat.getCorrect() >= .75f && stat.getConfusionMatrixAt(0, 0) > 50)
+        String cm = stat.getConfusion_matrix();
+        double correct = stat.getConfusionMatrixAt(0, 0), falsepositives = stat.getConfusionMatrixAt(0, 1) + stat.getConfusionMatrixAt(0, 2);
+        double ratio = correct/falsepositives;
+        if(stat.getCorrect() >= .75f && stat.getConfusionMatrixAt(0, 0) > 100 && ratio > goldenRatio)
         {
             return true;
         }
         
         return false;
+    }
+    
+    protected void generatePrediction(StockStats ss, Stock stock, int lookahead, String tag) throws Exception
+    {            
+        Classifier model = ss.loadModel();
+        logger.info(ss.getStock_sym() + "\n" + ss.getSummary());
+        int lastday = stock.getEntries().size()-1;
+        
+        for(int stockday = 0;stockday< m_daysBack-lookahead;stockday++)
+        {
+            HibernateUtil.beginTransaction();
+            Instance inst = generateQueryInstance(stock, lastday - m_daysBack + stockday);
+
+            double classification = model.classifyInstance(inst);                        
+            //logger.info("classifiaction for " + stockname + " = " + classification);
+
+            StockEntry se_now = stock.getEntries().get(lastday - m_daysBack + stockday);
+            se_now.setInfoByTag(tag, classification + "");
+            HibernateUtil.getCurrentSession().save(se_now);
+            HibernateUtil.commit();
+        }      
     }
     
     protected Instance generateQueryInstance(Stock stock, int index) throws Exception

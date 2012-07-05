@@ -171,7 +171,7 @@ public class StockStats
 
             if(lines.length==6)
             {
-                return extractNumbersFromString(lines[row+3])[col];
+                return extractNumbersFromString(lines[col+3])[row];
             }
         }
 

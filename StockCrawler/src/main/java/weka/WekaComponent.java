@@ -100,7 +100,6 @@ public class WekaComponent
         {
             // Create a naïve bayes classifier 
             Classifier model = (Classifier)new weka.classifiers.trees.J48();                       
-            //model.buildClassifier(data);
 
             Evaluation eval = new Evaluation(data);
             Random rand = new Random(1);  // using seed = 1
@@ -136,7 +135,7 @@ public class WekaComponent
             ss.setClassifier_name(weka.classifiers.trees.J48.class.getName());
             logger.info("\n===" + ss.getStock_sym() + "(" + lookAhead + " days ahead " + change*100 + "% change)" + "===" + ss.getSummary()+"\n"+ss.getConfusion_matrix());
 
-            //HibernateUtil.getCurrentSession().save(ss);
+            HibernateUtil.getCurrentSession().save(ss);
             HibernateUtil.commit();                        
         }
     }
