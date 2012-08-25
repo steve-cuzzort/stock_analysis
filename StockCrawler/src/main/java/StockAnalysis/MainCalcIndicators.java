@@ -25,72 +25,73 @@ import weka.core.Instances;
 public class MainCalcIndicators 
 {
 	// SELECT * FROM stock JOIN stock_stockstats ON(stock.id = stock_stockstats.Stock_id) JOIN stockstats ON(stock_stockstats.stats_id = stockstats.id) WHERE 1
-        static int lookAheadList[] = {3};
-        static double changeList[] = {.03, .04, .05};
+        static double computeList[][] = {
+            {3, .03},
+            {5, .05},
+            {10, .1},
+        };
+        static double changeList[] = {.01};
     
         public static void main(String args[]) throws Exception
 	{
-		Logger rootLogger = Logger.getRootLogger();
-		if (!rootLogger.getAllAppenders().hasMoreElements()) 
-		{
-			rootLogger.setLevel(Level.INFO);
-			try
-			{
-				rootLogger.addAppender(new FileAppender(
-					 new PatternLayout("%-5p [%t]: %m%n"), "stocks.log"));
-			}
-			catch(Exception e){}
-			// The TTCC_CONVERSION_PATTERN contains more info than
-			// the pattern we used for the root logger
-			Logger pkgLogger = rootLogger.getLoggerRepository().getLogger("robertmaldon.moneymachine");
-			pkgLogger.setLevel(Level.DEBUG);
-			pkgLogger.addAppender(new ConsoleAppender(
-				 new PatternLayout(PatternLayout.TTCC_CONVERSION_PATTERN)));
-		}
+            Logger rootLogger = Logger.getRootLogger();
+            if (!rootLogger.getAllAppenders().hasMoreElements()) 
+            {
+                rootLogger.setLevel(Level.INFO);
+                try
+                {
+                    rootLogger.addAppender(new FileAppender(
+                                new PatternLayout("%-5p [%t]: %m%n"), "stocks.log"));
+                }
+                catch(Exception e){}
+                // The TTCC_CONVERSION_PATTERN contains more info than
+                // the pattern we used for the root logger
+                Logger pkgLogger = rootLogger.getLoggerRepository().getLogger("robertmaldon.moneymachine");
+                pkgLogger.setLevel(Level.DEBUG);
+                pkgLogger.addAppender(new ConsoleAppender(
+                            new PatternLayout(PatternLayout.TTCC_CONVERSION_PATTERN)));
+            }
 
-		List<String> stocknames = new ArrayList<String>();
-		
-		HibernateUtil.startNewSession();
-		for(Stock s : Stock.getAllStocks())
-		{
-			stocknames.add(s.getSymbol());
-		}
-		HibernateUtil.closeSession();
-		
-		for(String stockname : stocknames)
-		{
-			HibernateUtil.startNewSession();
-			Stock stock = Stock.findStock(stockname);
-			
-			TAQuery query = new TAQuery(stock);
+            List<String> stocknames = new ArrayList<String>();
 
-			ArrayList<TAOutput> taouts = new ArrayList<TAOutput>();
-			for(String group : new String[] {"Cycle Indicators", "Momentum Indicators", "Overlap Studies", "Pattern Recognition", "Price Transform", "Statistic Functions", "Volatility Indicators", "Volume Indicators"})
-			{
-				for(String func : query.getFunctionsInGroup(group))
-				{	
-					TAOutput outs[] = query.runInidcator(func);
+            HibernateUtil.startNewSession();
+            for(Stock s : Stock.getAllStocks())
+            {
+                    stocknames.add(s.getSymbol());
+            }
+            HibernateUtil.closeSession();
 
-					for(TAOutput o : outs)
-					{
-						if(o.hasData())
-						{
-							taouts.add(o);
-						}
-					}
-				}
-			}
-                        
-                        for(int i=0;i<lookAheadList.length;i++)
+            for(String stockname : stocknames)
+            {
+                HibernateUtil.startNewSession();
+                Stock stock = Stock.findStock(stockname);
+
+                TAQuery query = new TAQuery(stock);
+
+                ArrayList<TAOutput> taouts = new ArrayList<TAOutput>();
+                for(String group : new String[] {"Cycle Indicators", "Momentum Indicators", "Overlap Studies", "Pattern Recognition", "Price Transform", "Statistic Functions", "Volatility Indicators", "Volume Indicators"})
+                {
+                    for(String func : query.getFunctionsInGroup(group))
+                    {	
+                        TAOutput outs[] = query.runInidcator(func);
+
+                        for(TAOutput o : outs)
                         {
-                            for(int j=0;j<changeList.length;j++)
+                            if(o.hasData())
                             {
-                                Instances data = WekaComponent.CreateWekaInstances(stock, taouts, lookAheadList[i], changeList[j]);
-                                WekaComponent.makeModel(stock, data, lookAheadList[i], changeList[j]);
-                                rootLogger.info("Wrote " + stock.getSymbol() + " to file (look ahead:" + lookAheadList[i] + ", " + changeList[j] + ")");
+                                taouts.add(o);
                             }
                         }
-			HibernateUtil.closeSession();
-		}
+                    }
+                }
+
+                for(int i=0;i<computeList.length;i++)
+                {
+                    Instances data = WekaComponent.CreateWekaInstances(stock, taouts, (int)computeList[i][0], computeList[i][1]);
+                    WekaComponent.makeModel(stock, data, (int)computeList[i][0], computeList[i][1]);
+                    rootLogger.info("Wrote " + stock.getSymbol() + " to file (look ahead:" + (int)computeList[i][0] + ", " + computeList[i][1] + ")");
+                }
+                HibernateUtil.closeSession();
+            }
 	}
 }

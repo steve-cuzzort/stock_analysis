@@ -32,30 +32,32 @@ public class TAOutput
         }
     }
 	
-	public boolean hasData()
-	{
-		if(values.length == 0)
-		{
-			return false;
-		}
-		
-		boolean ret = false;
-		Random rand = new Random();
-		
-		for(int i=0;i<100;i++)
-		{
-			int index = rand.nextInt();
-			if(index < 0)
-				index = -index;
-			
-			index %= values.length;
-			
-			if(values[index] != 0)
-			{
-				ret = true;
-			}
-		}
-		
-		return ret;
-	}
+    public boolean hasData()
+    {
+        if(values.length == 0)
+        {
+            return false;
+        }
+
+        boolean ret = false;
+        Random rand = new Random();
+
+        for(int i=0;i<100;i++)
+        {
+            int index = rand.nextInt();
+            if(index < 0)
+            {
+                index = -index;
+            }
+
+            index %= values.length;
+
+            if(values[index] != 0)
+            {
+                ret = true;
+            }
+        }
+
+        return ret;
+    }
 }
