@@ -54,6 +54,16 @@
                     <name>download</name>
                 </property>
             </activation>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <compilerargument>-verbose</compilerargument>
+                    <source>1.7</source>
+                    <target>1.7</target>
+                </configuration>
+            </plugin>
         
             <build>
                 <plugins>      
