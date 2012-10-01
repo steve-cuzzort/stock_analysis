@@ -22,7 +22,7 @@ public class App
     public static void main(String[] args) 
     {
         Logger rootLogger = Logger.getRootLogger();
-        if (!rootLogger.getAllAppenders().hasMoreElements()) 
+        /*if (!rootLogger.getAllAppenders().hasMoreElements()) 
         {
                 rootLogger.setLevel(Level.INFO);
                 try
@@ -37,7 +37,7 @@ public class App
                 pkgLogger.setLevel(Level.DEBUG);
                 pkgLogger.addAppender(new ConsoleAppender(
                          new PatternLayout(PatternLayout.TTCC_CONVERSION_PATTERN)));
-        }
+        }*/
 
         LoadFromYahoo.loadInAllStocksFromNASDAQFile();
         LoadFromYahoo.updateAllStocksFromYahoo();
