@@ -124,6 +124,46 @@
             </build>
         </profile>
     </profiles>
+
+<!-- Build for indicator calculation
+-->
+        <profile>
+            <id>simulator</id>
+            <activation>
+                <property>
+                    <name>simulator</name>
+                </property>
+            </activation>
+        
+            <build>
+                <plugins>      
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <configuration>
+                            <compilerargument>-verbose</compilerargument>
+                            <source>1.7</source>
+                            <target>1.7</target>
+                        </configuration>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>                        
+                        <configuration>
+                            <executable>java</executable>
+                            <arguments>
+                                <argument>-classpath</argument>
+                                <classpath />
+                                <argument>StockAnalysis.MainStockPicker</argument>
+                            </arguments>
+                        </configuration>
+                    </plugin>
+            
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
     
     <dependencies>
         <dependency>
