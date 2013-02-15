@@ -79,7 +79,7 @@ public class WekaComponent
             {
                 vals[attrindex++] = attsAnswer.indexOf("up");
             }
-            else if(ratio <= 1.0f - increase)
+            else if(ratio <= 1.0f)
             {
                 vals[attrindex++] = attsAnswer.indexOf("down");				
             }
@@ -133,6 +133,8 @@ public class WekaComponent
             ss.setConfusion_matrix(eval.toMatrixString());
 
             ss.setClassifier_name(weka.classifiers.trees.J48.class.getName());
+            ss.setClassifier_name(weka.classifiers.meta.AdaBoostM1.class.getName());
+            //ss.setClassifier_name(weka.classifiers.functions.SMO.class.getName());
             logger.info("\n===" + ss.getStock_sym() + "(" + lookAhead + " days ahead " + change*100 + "% change)" + "===" + ss.getSummary()+"\n"+ss.getConfusion_matrix());
 
             HibernateUtil.getCurrentSession().save(ss);
